@@ -1,0 +1,9 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+apscheduler>=3.10,<4
+anthropic>=0.40
+composio>=0.8
+pillow>=10.0
+tzdata
+python-dotenv>=1.0

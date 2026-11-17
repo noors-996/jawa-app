@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3d5a2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<title>مساعد جاوا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ea; --card:#fffdf7; --ink:#25291e; --muted:#6f7363; --line:#e4dfcf;
+  --olive:#3d5a2a; --olive-2:#5b7d3c; --oil:#c9a227; --oil-soft:#f6ecc6; --red:#a83a2b; --me:#e8efdc;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#171a13; --card:#20241a; --ink:#ece9dc; --muted:#a3a690; --line:#33382a;
+        --olive:#8fb46a; --olive-2:#a7c884; --oil:#e0bd4a; --oil-soft:#3a3420; --red:#e07a68; --me:#2b3420;}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Tajawal,system-ui,sans-serif;font-size:16px}
+button,input,textarea,select{font:inherit;color:inherit}
+.hidden{display:none!important}
+header{position:sticky;top:0;z-index:5;background:var(--olive);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;gap:10px}
+header .logo{width:34px;height:34px;border-radius:50%;background:var(--oil);display:grid;place-items:center;font-size:18px}
+header h1{font-size:19px;margin:0;font-weight:800;flex:1}
+header .badge{font-size:12px;background:rgba(255,255,255,.18);padding:3px 9px;border-radius:20px}
+main{max-width:720px;margin:0 auto;padding:12px 16px calc(84px + env(safe-area-inset-bottom))}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:5;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;padding:10px 0 8px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+nav button .i{font-size:21px}
+nav button.on{color:var(--olive);font-weight:700}
+nav .dot{position:absolute;top:6px;left:calc(50% - 18px);background:var(--red);color:#fff;font-size:10px;border-radius:9px;padding:0 5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--olive);color:#fff;font-weight:700;cursor:pointer}
+.btn.soft{background:var(--me);color:var(--ink)}
+.btn.warn{background:var(--red)}
+.btn.small{padding:7px 12px;font-size:14px}
+.btn:disabled{opacity:.5}
+label{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
+input,textarea,select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px}
+textarea{resize:vertical;min-height:120px;line-height:1.6}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:14px}
+.alert{background:var(--oil-soft);border:1px solid var(--oil);border-radius:14px;padding:12px;margin-bottom:12px;font-size:15px}
+
+/* chat */
+#msgs{display:flex;flex-direction:column;gap:10px;padding-bottom:110px}
+.m{max-width:86%;padding:10px 13px;border-radius:16px;line-height:1.65;white-space:pre-wrap;word-wrap:break-word}
+.m.user{align-self:flex-start;background:var(--me);border-bottom-right-radius:5px}
+.m.assistant{align-self:flex-end;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
+.m a{color:var(--olive-2)}
+.act{align-self:stretch;background:var(--oil-soft);border:1px solid var(--oil);border-radius:14px;padding:12px}
+.act p{margin:0 0 10px;white-space:pre-wrap;line-height:1.6}
+.typing{align-self:flex-end;color:var(--muted);font-size:14px}
+#composer{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:4;background:linear-gradient(transparent,var(--bg) 30%);padding:14px 12px 8px}
+#composer .box{max-width:720px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:6px}
+#composer textarea{border:0;background:none;min-height:40px;max-height:140px;padding:9px 6px}
+#composer textarea:focus{outline:none}
+.iconbtn{border:0;background:none;font-size:22px;width:42px;height:42px;border-radius:50%;cursor:pointer;flex:none}
+.iconbtn.send{background:var(--olive);color:#fff;font-size:18px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:7px 12px;font-size:14px;cursor:pointer}
+#attachName{font-size:13px;color:var(--olive);padding:0 10px 4px}
+
+/* schedule */
+.post{display:flex;gap:12px}
+.post .thumb{width:76px;height:96px;border-radius:12px;object-fit:cover;background:var(--line);flex:none}
+.post .body{flex:1;min-width:0}
+.post .cap{font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+.st{font-size:12px;font-weight:700;border-radius:20px;padding:2px 9px;display:inline-block}
+.st.scheduled{background:var(--me);color:var(--olive)}
+.st.published{background:#dcefd8;color:#2d6b25}
+.st.failed{background:#f6dcd7;color:var(--red)}
+.st.publishing{background:var(--oil-soft);color:#8a6d10}
+.preview{width:100%;max-height:320px;object-fit:contain;border-radius:12px;background:var(--line);margin-top:8px}
+.slots{display:flex;gap:6px;flex-wrap:wrap}
+.slot{display:flex;align-items:center;gap:4px;background:var(--me);border-radius:20px;padding:4px 6px 4px 10px}
+.slot button{border:0;background:none;color:var(--red);font-size:16px;cursor:pointer}
+.switch{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.switch input{width:auto;transform:scale(1.4)}
+.note{padding:10px 0;border-bottom:1px solid var(--line)}
+.note:last-child{border:0}
+.note small{color:var(--muted)}
+
+/* login */
+#login{min-height:100vh;display:grid;place-items:center;padding:24px}
+#login .card{width:100%;max-width:360px;text-align:center}
+#login .big{font-size:52px}
+</style>
+</head>
+<body>
+
+<section id="login" class="hidden">
+  <div class="card">
+    <div class="big">🫒</div>
+    <h2 id="loginTitle">مساعد جاوا</h2>
+    <input id="pw" type="password" placeholder="كلمة السر" autocomplete="current-password">
+    <p id="loginErr" class="muted" style="color:var(--red)"></p>
+    <button class="btn" style="width:100%" onclick="doLogin()">دخول</button>
+  </div>
+</section>
+
+<div id="app" class="hidden">
+  <header>
+    <div class="logo">🫒</div>
+    <h1 id="appName">مساعد جاوا</h1>
+    <span id="demoBadge" class="badge hidden">تجربة</span>
+  </header>
+
+  <main>
+    <div id="pausedAlert" class="alert hidden">⛔ انستغرام طلب تحقق أو تسجيل دخول، فوقفت النشر والردود. افتح انستغرام وتأكد إنه كل إشي تمام، وبعدين شغّل الحساب من <b>الإعدادات</b>.</div>
+
+    <!-- CHAT -->
+    <section id="tab-chat">
+      <div id="msgs"></div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section id="tab-sched" class="hidden">
+      <div class="card">
+        <h3 style="margin:0 0 6px">بوست جديد</h3>
+        <input type="file" id="postFile" accept="image/*,video/mp4,video/quicktime" class="hidden">
+        <button class="btn soft" style="width:100%" onclick="postFile.click()">📷 اختار صورة أو فيديو</button>
+        <div id="postPreviewWrap"></div>
+        <label>شو فكرة البوست؟ (اختياري)</label>
+        <input id="postNote" placeholder="مثلاً: الزيت الجديد طالع اليوم">
+        <div class="row" style="margin-top:8px"><button class="btn small soft" id="capBtn" onclick="genCaption()">✨ اكتبلي كابشن</button></div>
+        <label>الكابشن</label>
+        <textarea id="postCaption" placeholder="اكتب الكابشن أو خليني أكتبه"></textarea>
+        <label>متى ينزل؟ <span class="muted" id="nextSlotHint"></span></label>
+        <input id="postWhen" type="datetime-local">
+        <button class="btn" style="width:100%;margin-top:12px" onclick="savePost()">حطه بالجدول</button>
+      </div>
+      <h3 style="margin:18px 4px 8px">الجدول</h3>
+      <div id="postList"></div>
+    </section>
+
+    <!-- NOTES -->
+    <section id="tab-notes" class="hidden">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h3 style="margin:0">التنبيهات</h3>
+          <button class="btn small soft" onclick="runAuto()">🔄 شيّك هلأ</button>
+        </div>
+        <p class="muted" style="margin:6px 0 0">هون بتطلع الأشياء اللي بدها إياك: زباين ما رديت عليهم، ونتيجة النشر والرد التلقائي.</p>
+      </div>
+      <div class="card" id="noteList"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="tab-set" class="hidden">
+      <div class="card" id="pausedCard">
+        <div class="switch"><b>الحساب شغّال</b><input type="checkbox" id="sActive"></div>
+        <p class="muted" style="margin:0">إذا انستغرام طلب تحقق، التطبيق بيطفيها لحاله. رجّعها بس بعد ما تتأكد.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 6px">مواعيد النشر</h3>
+        <p class="muted" style="margin:0 0 8px">البوستات اللي بدون وقت بتنزل بأقرب موعد من هدول (بتوقيت عمّان).</p>
+        <div class="slots" id="slots"></div>
+        <div class="row" style="margin-top:8px"><input type="time" id="newSlot" style="width:auto"><button class="btn small soft" onclick="addSlot()">+ زيد</button></div>
+        <label>أكثر إشي بوستات باليوم</label>
+        <input type="number" id="sMaxDay" min="1" max="5">
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 6px">الرد التلقائي</h3>
+        <div class="switch"><span>يرد لحاله على أسئلة الزباين المهمة</span><input type="checkbox" id="sAuto"></div>
+        <p class="muted" style="margin:0 0 6px">بيرد بس على أسئلة السعر والموقع والدوام والطلب، وبيترك الباقي إلك بالتنبيهات. ⚠️ إذا شغلته هون، طفي المهمة المجدولة القديمة عشان ما ينرد على الزبون مرتين.</p>
+        <label>كل كم ساعة يشيّك؟</label>
+        <input type="number" id="sEvery" min="1" max="24">
+        <label>أكثر إشي ردود بكل مرة (لحد 4)</label>
+        <input type="number" id="sMaxRep" min="0" max="4">
+        <label>ساعات الهدوء (ما يرد فيها)</label>
+        <div class="row"><input type="time" id="sQFrom" style="flex:1"><span>لـ</span><input type="time" id="sQTo" style="flex:1"></div>
+      </div>
+      <button class="btn" style="width:100%" onclick="saveSettings()">احفظ</button>
+      <button class="btn soft" style="width:100%;margin-top:10px" onclick="resetChat()">🧹 ابدأ محادثة جديدة</button>
+    </section>
+  </main>
+
+  <div id="composer">
+    <div class="box" style="flex-direction:column;align-items:stretch">
+      <div class="chips" id="chips"></div>
+      <div id="attachName" class="hidden"></div>
+      <div style="display:flex;gap:6px;align-items:flex-end">
+        <input type="file" id="chatFile" accept="image/*,video/mp4,video/quicktime" class="hidden">
+        <button class="iconbtn" onclick="chatFile.click()" title="صورة">📎</button>
+        <textarea id="input" rows="1" placeholder="احكيلي شو بدك…"></textarea>
+        <button class="iconbtn send" id="sendBtn" onclick="send()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <nav>
+    <button data-t="chat" class="on"><span class="i">💬</span>المساعد</button>
+    <button data-t="sched"><span class="i">🗓️</span>الجدول</button>
+    <button data-t="notes"><span class="i">🔔</span>التنبيهات<span class="dot hidden" id="noteDot"></span></button>
+    <button data-t="set"><span class="i">⚙️</span>الإعدادات</button>
+  </nav>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const QUICK = ["في رسائل أو تعليقات جديدة؟","شو الجاي بالجدول؟","اكتبلي كابشن لريل جديد","كيف كان أداء آخر البوستات؟"];
+let settings = {};
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, {credentials: "same-origin", ...opts});
+  if (r.status === 401) { showLogin(); throw new Error("login"); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.detail || "صار خطأ");
+  return j;
+}
+const json = (method, body) => ({method, headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+const esc = s => (s || "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+
+function showLogin(){ $("#app").classList.add("hidden"); $("#login").classList.remove("hidden"); }
+async function doLogin(){
+  try { await api("/api/login", json("POST", {password: $("#pw").value})); boot(); }
+  catch(e){ $("#loginErr").textContent = e.message; }
+}
+$("#pw").addEventListener("keydown", e => e.key === "Enter" && doLogin());
+
+async function boot(){
+  const me = await api("/api/me");
+  $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
+  document.title = me.app_name; $("#appName").textContent = me.app_name;
+  $("#demoBadge").classList.toggle("hidden", !me.demo);
+  $("#pausedAlert").classList.toggle("hidden", !me.paused);
+  $("#noteDot").classList.toggle("hidden", !me.unseen); $("#noteDot").textContent = me.unseen;
+  $("#chips").innerHTML = QUICK.map(q => `<button class="chip">${q}</button>`).join("");
+  document.querySelectorAll(".chip").forEach(c => c.onclick = () => { $("#input").value = c.textContent; send(); });
+  loadChat();
+}
+
+// tabs
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  ["chat","sched","notes","set"].forEach(t => $("#tab-" + t).classList.toggle("hidden", t !== b.dataset.t));
+  $("#composer").classList.toggle("hidden", b.dataset.t !== "chat");
+  if (b.dataset.t === "sched") loadPosts();
+  if (b.dataset.t === "notes") loadNotes();
+  if (b.dataset.t === "set") loadSettings();
+});
+
+// ---------- chat ----------
+function addMsg(role, text){
+  const d = document.createElement("div"); d.className = "m " + role; d.innerHTML = linkify(text);
+  $("#msgs").appendChild(d); return d;
+}
+function addAction(a){
+  const d = document.createElement("div"); d.className = "act";
+  d.innerHTML = `<p>${esc(a.summary)}</p><div class="row"><button class="btn small">✅ موافق ابعت</button><button class="btn small soft">إلغاء</button></div>`;
+  const [ok, no] = d.querySelectorAll("button");
+  ok.onclick = async () => { ok.disabled = no.disabled = true; ok.textContent = "…";
+    try { const r = await api(`/api/actions/${a.id}/approve`, {method:"POST"}); d.querySelector(".row").outerHTML = `<b>${esc(r.result)}</b>`; }
+    catch(e){ d.querySelector(".row").outerHTML = `<b>${esc(e.message)}</b>`; } };
+  no.onclick = async () => { await api(`/api/actions/${a.id}/reject`, {method:"POST"}); d.querySelector(".row").outerHTML = `<span class="muted">انلغى</span>`; };
+  $("#msgs").appendChild(d);
+}
+const scrollEnd = () => window.scrollTo(0, document.body.scrollHeight);
+async function loadChat(){
+  const h = await api("/api/messages");
+  $("#msgs").innerHTML = "";
+  if (!h.messages.length) addMsg("assistant", "أهلين 👋 أنا مساعدك على انستغرام المعصرة.\nبقدر أشوفلك الرسائل والتعليقات، أجهز ردود، أكتب كابشن، وأرتب جدول البوستات. شو بدك نعمل؟");
+  h.messages.forEach(m => addMsg(m.role, m.text));
+  h.pending.forEach(addAction);
+  scrollEnd();
+}
+let attached = null;
+$("#chatFile").onchange = () => { attached = $("#chatFile").files[0];
+  $("#attachName").textContent = attached ? "📎 " + attached.name : ""; $("#attachName").classList.toggle("hidden", !attached); };
+const inp = $("#input");
+inp.addEventListener("input", () => { inp.style.height = "auto"; inp.style.height = Math.min(inp.scrollHeight, 140) + "px"; });
+inp.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 700) { e.preventDefault(); send(); }});
+async function send(){
+  const text = inp.value.trim(); if (!text && !attached) return;
+  addMsg("user", text + (attached ? `\n📎 ${attached.name}` : ""));
+  inp.value = ""; inp.style.height = "auto";
+  const fd = new FormData(); fd.append("text", text); if (attached) fd.append("file", attached);
+  attached = null; $("#chatFile").value = ""; $("#attachName").classList.add("hidden");
+  const t = document.createElement("div"); t.className = "typing"; t.textContent = "عم بشتغل عليها…"; $("#msgs").appendChild(t); scrollEnd();
+  $("#sendBtn").disabled = true;
+  try { const r = await api("/api/chat", {method:"POST", body: fd}); t.remove(); addMsg("assistant", r.reply); r.actions.forEach(addAction); }
+  catch(e){ t.remove(); if (e.message !== "login") addMsg("assistant", "⚠️ " + e.message); }
+  $("#sendBtn").disabled = false; scrollEnd();
+}
+
+// ---------- schedule ----------
+let postMedia = null;
+const STATUS = {scheduled:"بالجدول", publishing:"عم ينزل", published:"نزل", failed:"ما زبط"};
+$("#postFile").onchange = async () => {
+  const f = $("#postFile").files[0]; if (!f) return;
+  $("#postPreviewWrap").innerHTML = `<p class="muted">عم برفع…</p>`;
+  const fd = new FormData(); fd.append("file", f);
+  try {
+    postMedia = await api("/api/upload", {method:"POST", body: fd});
+    $("#postPreviewWrap").innerHTML = postMedia.type === "REELS"
+      ? `<video class="preview" src="${postMedia.url}" controls playsinline></video>`
+      : `<img class="preview" src="${postMedia.url}">`;
+  } catch(e){ $("#postPreviewWrap").innerHTML = `<p style="color:var(--red)">${esc(e.message)}</p>`; }
+};
+async function genCaption(){
+  if (!postMedia && !$("#postNote").value) { alert("اختار صورة أو اكتب فكرة البوست"); return; }
+  $("#capBtn").disabled = true; $("#capBtn").textContent = "عم بكتب…";
+  try { const r = await api("/api/caption", json("POST", {media_file: postMedia?.file || "", note: $("#postNote").value}));
+        $("#postCaption").value = r.caption; } catch(e){ alert(e.message); }
+  $("#capBtn").disabled = false; $("#capBtn").textContent = "✨ اكتبلي كابشن";
+}
+async function savePost(){
+  if (!postMedia) return alert("اختار صورة أو فيديو");
+  if (!$("#postCaption").value.trim()) return alert("بدنا كابشن");
+  const fd = new FormData(); fd.append("media_file", postMedia.file); fd.append("caption", $("#postCaption").value);
+  fd.append("when_local", ($("#postWhen").value || "").replace("T", " "));
+  try { await api("/api/posts", {method:"POST", body: fd});
+        postMedia = null; $("#postPreviewWrap").innerHTML = ""; $("#postCaption").value = ""; $("#postNote").value = ""; $("#postWhen").value = ""; $("#postFile").value = "";
+        loadPosts(); } catch(e){ alert(e.message); }
+}
+async function loadPosts(){
+  const r = await api("/api/posts");
+  $("#nextSlotHint").textContent = `(إذا تركته فاضي: ${r.next_slot})`;
+  $("#postList").innerHTML = r.posts.length ? "" : `<p class="muted" style="padding:0 4px">ما في بوستات بالجدول لسا.</p>`;
+  r.posts.forEach(p => {
+    const d = document.createElement("div"); d.className = "card";
+    const media = p.media_type === "REELS" ? `<video class="thumb" src="${p.media_url}#t=0.5" muted playsinline></video>` : `<img class="thumb" src="${p.media_url}">`;
+    d.innerHTML = `<div class="post">${media}<div class="body">
+      <div class="row" style="justify-content:space-between"><b>${esc(p.scheduled_local)}</b><span class="st ${p.status}">${STATUS[p.status]||p.status}</span></div>
+      <div class="cap">${esc(p.caption)}</div>
+      ${p.permalink ? `<a href="${p.permalink}" target="_blank" class="muted">شوفه على انستغرام ↗</a>` : ""}
+      ${p.error && p.status==="failed" ? `<div class="muted" style="color:var(--red)">${esc(p.error.slice(0,120))}</div>` : ""}
+      </div></div>
+      ${p.status==="scheduled"||p.status==="failed" ? `<div class="row" style="margin-top:10px">
+        <button class="btn small soft" data-a="edit">✏️ عدّل</button>
+        <button class="btn small soft" data-a="now">🚀 نزله هلأ</button>
+        ${p.status==="scheduled" ? `<button class="btn small soft" data-a="del">إلغاء</button>`:""}</div>` : ""}`;
+    d.querySelectorAll("[data-a]").forEach(b => b.onclick = () => postAction(p, b.dataset.a));
+    $("#postList").appendChild(d);
+  });
+}
+async function postAction(p, a){
+  if (a === "del" && confirm("تلغي هالبوست من الجدول؟")) { await api(`/api/posts/${p.id}`, {method:"DELETE"}); loadPosts(); }
+  if (a === "now" && confirm("أكيد بدك تنزله هلأ على انستغرام؟")) {
+    try { const r = await api(`/api/posts/${p.id}/publish`, {method:"POST"}); alert(r.status === "published" ? "نزل ✅" : "ما زبط ❌"); } catch(e){ alert(e.message); }
+    loadPosts();
+  }
+  if (a === "edit") {
+    const cap = prompt("الكابشن:", p.caption); if (cap === null) return;
+    const when = prompt("الوقت (YYYY-MM-DD HH:MM):", p.scheduled_local); if (when === null) return;
+    try { await api(`/api/posts/${p.id}`, json("PATCH", {caption: cap, when_local: when})); } catch(e){ alert(e.message); }
+    loadPosts();
+  }
+}
+
+// ---------- notes ----------
+async function loadNotes(){
+  const r = await api("/api/notes");
+  $("#noteList").innerHTML = r.notes.length ? r.notes.map(n => `<div class="note">${linkify(n.text)}
+    ${n.link ? `<br><a href="${n.link}" target="_blank">افتح البوست ↗</a>` : ""}<br><small>${n.created_local}</small></div>`).join("")
+    : `<p class="muted">ما في إشي جديد 👌</p>`;
+  await api("/api/notes/seen", {method:"POST"}); $("#noteDot").classList.add("hidden");
+}
+async function runAuto(){ await api("/api/autoreply/run", {method:"POST"}); alert("بلشت أشيّك. النتيجة بتطلع هون بعد شوي (الردود بتنبعت على مهل)."); }
+
+// ---------- settings ----------
+function renderSlots(){
+  $("#slots").innerHTML = settings.post_slots.map((s,i) => `<span class="slot">${s}<button data-i="${i}">×</button></span>`).join("");
+  $("#slots").querySelectorAll("button").forEach(b => b.onclick = () => { settings.post_slots.splice(+b.dataset.i, 1); renderSlots(); });
+}
+function addSlot(){ const v = $("#newSlot").value; if (v && !settings.post_slots.includes(v)) { settings.post_slots.push(v); settings.post_slots.sort(); renderSlots(); } }
+async function loadSettings(){
+  settings = await api("/api/settings");
+  renderSlots();
+  $("#sActive").checked = !settings.paused; $("#sMaxDay").value = settings.max_posts_per_day;
+  $("#sAuto").checked = settings.autoreply_enabled; $("#sEvery").value = settings.autoreply_every_hours;
+  $("#sMaxRep").value = settings.autoreply_max_replies; $("#sQFrom").value = settings.autoreply_quiet_from; $("#sQTo").value = settings.autoreply_quiet_to;
+}
+async function saveSettings(){
+  settings = await api("/api/settings", json("POST", {
+    post_slots: settings.post_slots, max_posts_per_day: +$("#sMaxDay").value || 2, paused: !$("#sActive").checked,
+    autoreply_enabled: $("#sAuto").checked, autoreply_every_hours: +$("#sEvery").value || 3,
+    autoreply_max_replies: +$("#sMaxRep").value, autoreply_quiet_from: $("#sQFrom").value || "00:30", autoreply_quiet_to: $("#sQTo").value || "08:00"}));
+  $("#pausedAlert").classList.toggle("hidden", !settings.paused);
+  alert("انحفظ ✅");
+}
+async function resetChat(){ if (confirm("تمسح المحادثة وتبدأ من جديد؟")) { await api("/api/chat/reset", {method:"POST"}); loadChat(); } }
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});
+boot().catch(e => { if (e.message !== "login") document.body.innerHTML = "<p style='padding:20px'>ما قدرت أفتح التطبيق: " + esc(e.message) + "</p>"; });
+</script>
+</body>
+</html>
