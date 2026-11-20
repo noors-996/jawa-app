@@ -40,14 +40,45 @@ def _as_dict(res):
     return {"data": res, "successful": True}
 
 
+_account = None  # (connected_account_id, user_id) found automatically when not set
+
+
+def _field(obj, name):
+    if isinstance(obj, dict):
+        return obj.get(name)
+    return getattr(obj, name, None)
+
+
+def _find_account():
+    """Use the newest ACTIVE Instagram connection on this Composio key when no ID is configured."""
+    global _account
+    if config.COMPOSIO_CONNECTED_ACCOUNT_ID:
+        return config.COMPOSIO_CONNECTED_ACCOUNT_ID, config.COMPOSIO_USER_ID
+    if _account:
+        return _account
+    try:
+        res = _get_client().connected_accounts.list(
+            toolkit_slugs=["instagram"], statuses=["ACTIVE"], order_by="created_at", order_direction="desc")
+    except Exception as e:
+        _raise_for(str(e))
+        raise InstagramError(f"ما قدرت أجيب حسابات انستغرام من Composio: {str(e)[:200]}")
+    items = _field(res, "items") or _field(res, "data") or []
+    if not items:
+        raise InstagramError("ما في حساب انستغرام مربوط وشغال على مفتاح Composio هاد")
+    items = sorted(items, key=lambda a: str(_field(a, "created_at") or ""), reverse=True)
+    acc = items[0]
+    _account = (_field(acc, "id"), _field(acc, "user_id") or config.COMPOSIO_USER_ID)
+    return _account
+
+
 def call(slug: str, arguments: dict) -> dict:
     if config.DEMO_MODE:
         from .demo import fake_call
         return fake_call(slug, arguments)
-    kwargs = {"connected_account_id": config.COMPOSIO_CONNECTED_ACCOUNT_ID,
-              "dangerously_skip_version_check": True}
-    if config.COMPOSIO_USER_ID:
-        kwargs["user_id"] = config.COMPOSIO_USER_ID
+    account_id, user_id = _find_account()
+    kwargs = {"connected_account_id": account_id, "dangerously_skip_version_check": True}
+    if user_id:
+        kwargs["user_id"] = user_id
     try:
         res = _as_dict(_get_client().tools.execute(slug, arguments, **kwargs))
     except Exception as e:  # network / SDK error
