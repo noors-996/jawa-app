@@ -177,7 +177,8 @@ def execute_action(action_id: int) -> str:
 
 def _history(limit=30):
     rows = db.q("SELECT role, content FROM messages ORDER BY id DESC LIMIT ?", (limit,))[::-1]
-    msgs = [{"role": r["role"], "content": json.loads(r["content"])} for r in rows]
+    msgs = [{"role": r["role"], "content": _strip_thinking(json.loads(r["content"]))} for r in rows]
+    msgs = [m for m in msgs if m["content"]]
     # history must start with a plain user message
     while msgs and not (msgs[0]["role"] == "user" and isinstance(msgs[0]["content"], str)):
         msgs.pop(0)
@@ -197,7 +198,17 @@ def _history(limit=30):
     return clean
 
 
+def _strip_thinking(content):
+    """Thinking blocks are only valid inside the request that made them; never replay old ones."""
+    if isinstance(content, list):
+        return [b for b in content if not (isinstance(b, dict) and b.get("type") in ("thinking", "redacted_thinking"))]
+    return content
+
+
 def _save(role, content):
+    content = _strip_thinking(content)
+    if not content:
+        return
     db.ins("INSERT INTO messages(role, content, created) VALUES(?,?,?)",
            (role, json.dumps(content, ensure_ascii=False), db.now_iso()))
 
