@@ -108,10 +108,11 @@ def _items(data):
 
 
 # ---------- read ----------
-def recent_posts(limit=8):
-    data = call("INSTAGRAM_GET_IG_USER_MEDIA", {
-        "ig_user_id": "me", "limit": limit,
-        "fields": "id,caption,media_product_type,permalink,timestamp,comments_count,like_count"})
+def recent_posts(limit=8, extra_fields=""):
+    fields = "id,caption,media_product_type,permalink,timestamp,comments_count,like_count"
+    if extra_fields:
+        fields += "," + extra_fields
+    data = call("INSTAGRAM_GET_IG_USER_MEDIA", {"ig_user_id": "me", "limit": limit, "fields": fields})
     return _items(data)
 
 

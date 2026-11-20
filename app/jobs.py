@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from . import autoreply, db, ig, posts
+from . import autoreply, db, ig, posts, review
 
 _sched = BackgroundScheduler(timezone="UTC")
 _reply_lock = threading.Lock()
@@ -46,7 +46,18 @@ def _autoreply_tick():
     run_autoreply_now()
 
 
+def _review_tick():
+    try:
+        review.check_new_posts()
+    except ig.InstagramStop:
+        db.set_settings({"paused": True})
+        db.add_note("⛔ انستغرام طلب تحقق أو تسجيل دخول. وقّفت كل إشي.")
+    except Exception:
+        pass  # try again next tick
+
+
 def start():
     _sched.add_job(_publish_tick, "interval", minutes=1, id="publish", max_instances=1, coalesce=True)
+    _sched.add_job(_review_tick, "interval", minutes=10, id="review", max_instances=1, coalesce=True)
     _sched.add_job(_autoreply_tick, "interval", minutes=10, id="autoreply", max_instances=1, coalesce=True)
     _sched.start()
