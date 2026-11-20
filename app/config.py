@@ -31,6 +31,8 @@ MODEL = _env("MODEL", "claude-sonnet-5-5")
 COMPOSIO_API_KEY = _env("COMPOSIO_API_KEY")
 COMPOSIO_USER_ID = _env("COMPOSIO_USER_ID") or None
 COMPOSIO_CONNECTED_ACCOUNT_ID = _env("COMPOSIO_CONNECTED_ACCOUNT_ID") or None
+# For Composio Connect keys (ck_...): which Instagram connection to use (the old one is dead).
+COMPOSIO_ACCOUNT = _env("COMPOSIO_ACCOUNT", "instagram_fluted-tipman")
 IG_USER_ID = os.getenv("IG_USER_ID", "17841434449825074")
 IG_USERNAME = os.getenv("IG_USERNAME", "jawapress")
 

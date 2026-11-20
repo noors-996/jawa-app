@@ -77,6 +77,8 @@ def call(slug: str, arguments: dict) -> dict:
     if config.DEMO_MODE:
         from .demo import fake_call
         return fake_call(slug, arguments)
+    if config.COMPOSIO_API_KEY.startswith("ck_"):
+        return _connect_call(slug, arguments)
     account_id, user_id = _find_account()
     kwargs = {"connected_account_id": account_id, "dangerously_skip_version_check": True}
     if user_id:
@@ -91,6 +93,23 @@ def call(slug: str, arguments: dict) -> dict:
     if not res.get("successful", True) or res.get("error"):
         _raise_for(json.dumps(res, ensure_ascii=False))
         raise InstagramError(str(res.get("error") or res)[:500])
+    return res.get("data") or {}
+
+
+def _connect_call(slug: str, arguments: dict) -> dict:
+    from . import composio_connect
+    try:
+        res = composio_connect.execute(slug, arguments)
+    except Exception as e:
+        detail = f"{e} ({e.__cause__!r})" if e.__cause__ else str(e)
+        print(f"[composio-connect] {slug} failed: {detail}", flush=True)
+        _raise_for(detail)
+        raise InstagramError(detail[:500])
+    if not res.get("successful", True) or res.get("error"):
+        text = json.dumps(res.get("error"), ensure_ascii=False, default=str)
+        print(f"[composio-connect] {slug} error: {text[:300]}", flush=True)
+        _raise_for(text)
+        raise InstagramError(text[:500])
     return res.get("data") or {}
 
 
