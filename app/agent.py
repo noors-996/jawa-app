@@ -233,6 +233,11 @@ def chat(user_text: str, image_file: str | None = None) -> dict:
         data = base64.standard_b64encode((config.MEDIA_DIR / image_file).read_bytes()).decode()
         current["content"] = [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": data}},
                               {"type": "text", "text": text}]
+    elif image_file:  # a video: show Claude frames from across the clip
+        from . import media_view
+        frames = media_view.video_blocks(config.MEDIA_DIR / image_file)
+        if frames:
+            current["content"] = frames + [{"type": "text", "text": text}]
 
     new_actions = []
     for _ in range(10):
