@@ -20,12 +20,17 @@ TIMEZONE = os.getenv("TIMEZONE", "Asia/Amman")
 # Public https address of this app. Instagram downloads your photos/videos from here.
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-MODEL = os.getenv("MODEL", "claude-sonnet-5-5")
+def _env(name, default=""):
+    """Pasted keys often carry stray spaces or line breaks; those break HTTP headers."""
+    return "".join((os.getenv(name) or default).split())
 
-COMPOSIO_API_KEY = os.getenv("COMPOSIO_API_KEY", "")
-COMPOSIO_USER_ID = os.getenv("COMPOSIO_USER_ID") or None
-COMPOSIO_CONNECTED_ACCOUNT_ID = os.getenv("COMPOSIO_CONNECTED_ACCOUNT_ID") or None
+
+ANTHROPIC_API_KEY = _env("ANTHROPIC_API_KEY")
+MODEL = _env("MODEL", "claude-sonnet-5-5")
+
+COMPOSIO_API_KEY = _env("COMPOSIO_API_KEY")
+COMPOSIO_USER_ID = _env("COMPOSIO_USER_ID") or None
+COMPOSIO_CONNECTED_ACCOUNT_ID = _env("COMPOSIO_CONNECTED_ACCOUNT_ID") or None
 IG_USER_ID = os.getenv("IG_USER_ID", "17841434449825074")
 IG_USERNAME = os.getenv("IG_USERNAME", "jawapress")
 

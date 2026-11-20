@@ -60,8 +60,10 @@ def _find_account():
         res = _get_client().connected_accounts.list(
             toolkit_slugs=["instagram"], statuses=["ACTIVE"], order_by="created_at", order_direction="desc")
     except Exception as e:
-        _raise_for(str(e))
-        raise InstagramError(f"ما قدرت أجيب حسابات انستغرام من Composio: {str(e)[:200]}")
+        detail = f"{e} ({e.__cause__!r})" if e.__cause__ else str(e)
+        print(f"[composio] list accounts failed: {detail}", flush=True)
+        _raise_for(detail)
+        raise InstagramError(f"ما قدرت أجيب حسابات انستغرام من Composio: {detail[:300]}")
     items = _field(res, "items") or _field(res, "data") or []
     if not items:
         raise InstagramError("ما في حساب انستغرام مربوط وشغال على مفتاح Composio هاد")
@@ -82,8 +84,10 @@ def call(slug: str, arguments: dict) -> dict:
     try:
         res = _as_dict(_get_client().tools.execute(slug, arguments, **kwargs))
     except Exception as e:  # network / SDK error
-        _raise_for(str(e))
-        raise InstagramError(str(e))
+        detail = f"{e} ({e.__cause__!r})" if e.__cause__ else str(e)
+        print(f"[composio] {slug} failed: {detail}", flush=True)
+        _raise_for(detail)
+        raise InstagramError(detail[:500])
     if not res.get("successful", True) or res.get("error"):
         _raise_for(json.dumps(res, ensure_ascii=False))
         raise InstagramError(str(res.get("error") or res)[:500])
